@@ -195,3 +195,66 @@ body.neon .game-over {
     flex-direction: column;
   }
 }
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+        font-size: 0.95em;
+    }
+
+    .container {
+        padding: 15px;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1.2em;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    button {
+        width: 100% !important;
+        font-size: 1em;
+    }
+
+    button {
+        padding: 14px;
+    }
+
+    .player-cards {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .player-card {
+        flex: 1 1 100%;
+        margin-bottom: 15px;
+    }
+
+    .history-table th, .history-table td {
+        font-size: 0.85em;
+        padding: 8px;
+    }
+
+    .dark-mode-toggle {
+        top: 10px;
+        right: 10px;
+        font-size: 1.4em;
+    }
+
+    .call-it-options {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .game-over-message {
+        font-size: 1.3em;
+        padding: 15px;
+    }
+}
