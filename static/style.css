@@ -1,0 +1,327 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+body.dark {
+    background-color: #121212;
+    color: #f1f1f1;
+}
+
+.container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    width: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+body.dark .container {
+    background-color: #1e1e1e;
+    color: #f1f1f1;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+h1, h2 {
+    color: #2c3e50;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+body.dark h1, body.dark h2 {
+    color: #e0e0e0;
+}
+
+.section {
+    margin-bottom: 30px;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+}
+
+body.dark .section {
+    border-color: #333;
+    background-color: #282828;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    background-color: #fff;
+    color: #333;
+}
+
+body.dark input[type="text"],
+body.dark input[type="number"],
+body.dark select {
+    background-color: #3a3a3a;
+    border-color: #555;
+    color: #f1f1f1;
+}
+
+input[type="radio"] {
+    margin-right: 5px;
+}
+
+button {
+    background-color: #3498db;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    align-self: flex-start; /* Aligns button to the left */
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button.reset-button {
+    background-color: #e74c3c;
+    margin-top: 30px;
+    align-self: center;
+}
+
+button.reset-button:hover {
+    background-color: #c0392b;
+}
+
+/* Dark Mode Toggle Button */
+.dark-mode-toggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    cursor: pointer;
+    z-index: 1000;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+    color: #555;
+}
+
+body.dark .dark-mode-toggle {
+    color: #f1c40f;
+}
+
+.dark-mode-toggle:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+body.dark .dark-mode-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* Player List */
+.player-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.player-card {
+    background-color: #ecf0f1;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    min-width: 150px;
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+    flex: 1 1 200px; /* Allows cards to grow and shrink */
+}
+
+body.dark .player-card {
+    background-color: #34495e;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+}
+
+.player-card h3 {
+    margin-top: 0;
+    color: #2c3e50;
+    font-size: 1.3em;
+}
+
+body.dark .player-card h3 {
+    color: #f1f1f1;
+}
+
+.player-score {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #27ae60; /* Green for positive/good scores */
+    margin-top: 10px;
+}
+
+.player-score.negative {
+    color: #e74c3c; /* Red for negative/bad scores */
+}
+
+/* Call It Form Specifics */
+.call-it-options label {
+    margin-right: 20px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.hand-values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.hand-values-grid label {
+    display: flex;
+    flex-direction: column;
+}
+
+/* History Table */
+.history-table-container {
+    overflow-x: auto; /* For responsive table on small screens */
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.history-table th, .history-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+body.dark .history-table th, body.dark .history-table td {
+    border-color: #444;
+}
+
+.history-table th {
+    background-color: #f2f2f2;
+    color: #555;
+    font-weight: bold;
+}
+
+body.dark .history-table th {
+    background-color: #333;
+    color: #ccc;
+}
+
+.history-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+body.dark .history-table tr:nth-child(even) {
+    background-color: #2f2f2f;
+}
+
+.history-table .correct-icon {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.history-table .incorrect-icon {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+/* Game Over Message */
+.game-over-message {
+    text-align: center;
+    margin-top: 40px;
+    padding: 25px;
+    background-color: #d4edda; /* Light green */
+    color: #155724; /* Dark green */
+    border-radius: 10px;
+    font-size: 1.8em;
+    font-weight: bold;
+    border: 2px solid #28a745;
+}
+
+body.dark .game-over-message {
+    background-color: #216a3a;
+    color: #d4edda;
+    border-color: #1e7e34;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.4em;
+    }
+
+    button {
+        width: 100%;
+        align-self: stretch;
+    }
+
+    .player-card {
+        flex: 1 1 100%; /* Stack cards on small screens */
+    }
+
+    .hand-values-grid {
+        grid-template-columns: 1fr; /* Stack hand value inputs */
+    }
+}
+
+/* Flash animation for score changes */
+.score-flash {
+    animation: flash 0.5s forwards;
+}
+
+@keyframes flash {
+    0% { background-color: yellow; }
+    100% { background-color: transparent; }
+}
+
+body.dark .score-flash {
+    animation: dark-flash 0.5s forwards;
+}
+
+@keyframes dark-flash {
+    0% { background-color: #7d6b00; } /* Darker yellow */
+    100% { background-color: transparent; }
+}
