@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Golf Game Web</title>
+</head>
+<body>
+    <h1>Golf Scorekeeper</h1>
+
+    <h2>Add Player</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="add_player">
+        <input type="text" name="player_name" placeholder="Enter player name">
+        <button type="submit">Add</button>
+    </form>
+
+    <h2>Players</h2>
+    <ul>
+        {% for name, score in game.players.items() %}
+        <li>{{ name }}: {{ score }}</li>
+        {% endfor %}
+    </ul>
+
+    {% if game.players %}
+    <h2>Call It</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="call_it">
+        <label>Caller:
+            <select name="caller">
+                {% for name in game.players %}
+                <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+        <label>Correct?
+            <input type="radio" name="correct" value="yes"> Yes
+            <input type="radio" name="correct" value="no" checked> No
+        </label><br><br>
+
+        {% for name in game.players %}
+            {% if name != game.winner %}
+                <label>{{ name }}'s hand value:
+                    <input type="number" name="hand_{{ name }}">
+                </label><br>
+            {% endif %}
+        {% endfor %}
+
+        <button type="submit">Submit Round</button>
+    </form>
+    {% endif %}
+
+    <h2>History</h2>
+    <ul>
+        {% for entry in game.history %}
+        <li>
+            Round {{ entry.round }}: {{ entry.caller }} called it –
+            {% if entry.correct %}Correct ✅{% else %}Incorrect ❌{% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+
+    <form method="post">
+        <input type="hidden" name="action" value="reset">
+        <button type="submit">Reset Game</button>
+    </form>
+
+    {% if game.game_over %}
+        <h2>🎉 Game Over! Winner: {{ game.winner }} 🎉</h2>
+    {% endif %}
+</body>
+</html>
