@@ -1,70 +1,170 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Golf Game Web</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Golf Scorekeeper</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      animation: fadeIn 1s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .container {
+      max-width: 700px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      animation: popIn 0.6s ease-out;
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.95); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.2em;
+      margin-bottom: 10px;
+      color: #2b7a78;
+      animation: slideDown 0.6s ease-in-out;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 1.4em;
+    }
+    @keyframes slideDown {
+      from { transform: translateY(-40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    form {
+      margin: 15px 0;
+    }
+    input[type="text"], input[type="number"], select {
+      padding: 10px;
+      margin: 8px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+    input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .player-list, .history {
+      padding: 10px 0;
+    }
+    .winner {
+      background: #d1e7dd;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 20px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .subheader {
+      text-align: center;
+      font-size: 1.2em;
+      font-style: italic;
+      color: #555;
+      margin-bottom: 30px;
+      animation: fadeIn 1.4s ease;
+    }
+  </style>
 </head>
 <body>
-    <h1>Golf Scorekeeper</h1>
+  <div class="container">
+    <h1>🏌️ The Ultimate Game of Golf!</h1>
+    <div class="subheader">Scorekeeper App</div>
 
-    <h2>Add Player</h2>
     <form method="post">
-        <input type="hidden" name="action" value="add_player">
-        <input type="text" name="player_name" placeholder="Enter player name">
-        <button type="submit">Add</button>
+      <input type="hidden" name="action" value="add_player">
+      <input type="text" name="player_name" placeholder="Enter new player name" required>
+      <button type="submit">Add Player</button>
     </form>
 
-    <h2>Players</h2>
-    <ul>
-        {% for name, score in game.players.items() %}
-        <li>{{ name }}: {{ score }}</li>
-        {% endfor %}
-    </ul>
+    <h2>Current Scores</h2>
+    <div class="player-list">
+      {% if game.players %}
+        <ul>
+          {% for name, score in game.players.items() %}
+          <li><strong>{{ name }}</strong>: {{ score }} pts</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No players added yet.</p>
+      {% endif %}
+    </div>
 
     {% if game.players %}
     <h2>Call It</h2>
     <form method="post">
-        <input type="hidden" name="action" value="call_it">
-        <label>Caller:
-            <select name="caller">
-                {% for name in game.players %}
-                <option value="{{ name }}">{{ name }}</option>
-                {% endfor %}
-            </select>
-        </label><br>
-        <label>Correct?
-            <input type="radio" name="correct" value="yes"> Yes
-            <input type="radio" name="correct" value="no" checked> No
-        </label><br><br>
+      <input type="hidden" name="action" value="call_it">
+      <label>Caller:
+        <select name="caller">
+          {% for name in game.players %}
+          <option value="{{ name }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+      </label><br>
 
-        {% for name in game.players %}
-            {% if name != game.winner %}
-                <label>{{ name }}'s hand value:
-                    <input type="number" name="hand_{{ name }}">
-                </label><br>
-            {% endif %}
-        {% endfor %}
+      <label>Were they correct?</label><br>
+      <label><input type="radio" name="correct" value="yes"> Yes</label>
+      <label><input type="radio" name="correct" value="no" checked> No</label><br>
 
-        <button type="submit">Submit Round</button>
+      {% for name in game.players %}
+        {% if name != game.winner %}
+        <label>{{ name }}'s hand value:</label>
+        <input type="number" name="hand_{{ name }}" placeholder="0">
+        {% endif %}
+      {% endfor %}
+
+      <button type="submit">Submit Round</button>
     </form>
     {% endif %}
 
-    <h2>History</h2>
-    <ul>
-        {% for entry in game.history %}
-        <li>
-            Round {{ entry.round }}: {{ entry.caller }} called it –
-            {% if entry.correct %}Correct ✅{% else %}Incorrect ❌{% endif %}
-        </li>
-        {% endfor %}
-    </ul>
+    <h2>Game History</h2>
+    <div class="history">
+      {% for entry in game.history %}
+        <p>Round {{ entry.round }}: <strong>{{ entry.caller }}</strong> called it —
+          {% if entry.correct %}<span style="color:green;">Correct</span>{% else %}<span style="color:red;">Incorrect</span>{% endif %}</p>
+      {% endfor %}
+    </div>
 
     <form method="post">
-        <input type="hidden" name="action" value="reset">
-        <button type="submit">Reset Game</button>
+      <input type="hidden" name="action" value="reset">
+      <button style="background-color: #dc3545;">Reset Game</button>
     </form>
 
     {% if game.game_over %}
-        <h2>🎉 Game Over! Winner: {{ game.winner }} 🎉</h2>
+    <div class="winner">
+      🎉 Game Over! Winner: {{ game.winner }} 🎉
+    </div>
     {% endif %}
+  </div>
 </body>
 </html>
