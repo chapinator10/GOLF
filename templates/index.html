@@ -1,207 +1,196 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Golf Game Web</title>
+    <meta charset="UTF-8">
+    <title>The Ultimate Game of Golf!</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
     <audio id="ding" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" preload="auto"></audio>
     <audio id="win" src="https://actions.google.com/sounds/v1/alarms/winding_up.ogg" preload="auto"></audio>
 </head>
 <body>
-
-    <button onclick="toggleDarkMode()" class="dark-mode-toggle">🌓</button>
+    <div class="top-bar">
+        <h1>🏌️ The Ultimate Game of Golf!</h1>
+        <div class="theme-switcher">
+            <label for="theme">🎨 Theme:</label>
+            <select id="theme">
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+                <option value="neon">Neon</option>
+            </select>
+        </div>
+    </div>
 
     <div class="container">
-        <h1>Golf Scorekeeper</h1>
+        <!-- Add Player -->
+        <form id="add-player-form" method="post">
+            <input type="hidden" name="action" value="add_player">
+            <input type="text" name="player_name" placeholder="Add a player..." required>
+            <button type="submit">➕ Add Player</button>
+        </form>
 
-        <div class="section add-player-section">
-            <h2>Add Player</h2>
-            <form id="add-player-form" method="post">
-                <input type="hidden" name="action" value="add_player">
-                <input type="text" name="player_name" placeholder="Enter player name" id="player-name-input">
-                <button type="submit">Add Player</button>
-            </form>
-        </div>
-
-        <div class="section players-section">
-            <h2>Players & Scores</h2>
-            <div class="player-cards">
-                {% for name, score in game.players.items() %}
-                <div class="player-card" data-player-name="{{ name }}">
-                    <h3>{{ name }}</h3>
-                    <p class="player-score {% if score < 0 %}negative{% endif %}">{{ score }}</p>
-                </div>
-                {% else %}
-                <p>No players added yet. Add a player above!</p>
-                {% endfor %}
+        <!-- Player Cards -->
+        <div class="player-cards">
+            {% for name, score in game.players.items() %}
+            <div class="player-card">
+                <h3>{{ name }}</h3>
+                <p class="score {% if score < 0 %}negative{% endif %}">{{ score }}</p>
             </div>
+            {% endfor %}
         </div>
 
         {% if game.players %}
-        <div class="section call-it-section">
-            <h2>Call It - Round {{ game.round + 1 }}</h2>
-            <form id="call-it-form" method="post">
-                <input type="hidden" name="action" value="call_it">
-                <label>Caller:
-                    <select name="caller" id="caller-select">
-                        {% for name in game.players %}
-                        <option value="{{ name }}">{{ name }}</option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <div class="call-it-options">
-                    <label>Correct?
-                        <input type="radio" name="correct" value="yes"> Yes
-                    </label>
-                    <label>
-                        <input type="radio" name="correct" value="no" checked> No
-                    </label>
-                </div>
+        <!-- Call It Form -->
+        <form id="call-it-form" method="post">
+            <input type="hidden" name="action" value="call_it">
+            <h2>Call It!</h2>
 
-                <div class="hand-values-grid" id="hand-values-inputs">
-                    </div>
+            <label>Caller:
+                <select name="caller" id="caller-select">
+                    {% for name in game.players %}
+                    <option value="{{ name }}">{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-                <button type="submit">Submit Round</button>
-            </form>
-        </div>
-        {% endif %}
+            <label><input type="radio" name="correct" value="yes"> ✅ Correct</label>
+            <label><input type="radio" name="correct" value="no" checked> ❌ Incorrect</label>
 
-        <div class="section history-section">
-            <h2>Game History</h2>
-            {% if game.history %}
-            <div class="history-table-container">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Round</th>
-                            <th>Caller</th>
-                            <th>Outcome</th>
-                            <th>Score Changes</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for entry in game.history | reverse %} {# Display most recent rounds first #}
-                        <tr>
-                            <td>{{ entry.round }}</td>
-                            <td>{{ entry.caller }}</td>
-                            <td>
-                                {% if entry.correct %}
-                                <span class="correct-icon">Correct ✅</span>
-                                {% else %}
-                                <span class="incorrect-icon">Incorrect ❌</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <ul>
-                                    {% for player, change in entry.score_changes.items() %}
-                                    <li>{{ player }}: {{ "%+d" | format(change) }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <p>No rounds played yet. Start a new round!</p>
-            {% endif %}
-        </div>
+            <div id="hand-values"></div>
 
-        {% if game.game_over %}
-            <div class="game-over-message">
-                <h2>🎉 Game Over! Winner: {{ game.winner }} 🎉</h2>
-            </div>
-        {% endif %}
-
-        <form method="post" class="reset-form">
-            <input type="hidden" name="action" value="reset">
-            <button type="submit" class="reset-button">Reset Game</button>
+            <button type="submit">🎯 Submit Round</button>
         </form>
+        {% endif %}
+
+        <!-- History -->
+        {% if game.history %}
+        <div class="history">
+            <h2>📜 Game History</h2>
+            <ul>
+                {% for entry in game.history | reverse %}
+                <li>Round {{ entry.round }} - {{ entry.caller }}: {% if entry.correct %}✅{% else %}❌{% endif %}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Game Over -->
+        {% if game.game_over %}
+        <div class="game-over">
+            🎉 Game Over! Winner: <strong>{{ game.winner }}</strong>
+        </div>
+        {% endif %}
+
+        <!-- Reset -->
+        <form method="post">
+            <input type="hidden" name="action" value="reset">
+            <button class="reset-button">🔁 Reset Game</button>
+        </form>
+
+        <!-- STATS + HALL OF FAME -->
+        <div class="extras">
+            <h2>🏅 Hall of Fame</h2>
+            <ul id="hall-of-fame"></ul>
+
+            <h2>📊 Stats</h2>
+            <div id="stats"></div>
+
+            <h2>📤 Share</h2>
+            <button onclick="copySummary()">📋 Copy Game Summary</button>
+        </div>
     </div>
 
     <script>
-        // 🌙 Dark Mode Toggle
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark");
-            localStorage.setItem("darkMode", document.body.classList.contains("dark"));
+        // Theme
+        const themeSelect = document.getElementById('theme');
+        themeSelect.value = localStorage.getItem('theme') || 'light';
+        document.body.className = themeSelect.value;
+        themeSelect.addEventListener('change', () => {
+            const theme = themeSelect.value;
+            document.body.className = theme;
+            localStorage.setItem('theme', theme);
+        });
+
+        // Hand inputs (dynamically hide caller)
+        const callerSelect = document.getElementById('caller-select');
+        const handValues = document.getElementById('hand-values');
+        const players = JSON.parse('{{ game.players | tojson | safe }}');
+
+        function updateHandInputs() {
+            const caller = callerSelect?.value;
+            let html = '';
+            for (let name in players) {
+                if (name !== caller) {
+                    html += `<label>${name}'s hand:
+                        <input type="number" name="hand_${name}" value="0" required></label>`;
+                }
+            }
+            if (handValues) handValues.innerHTML = html;
         }
-
-        // 🧠 Load dark mode preference and game state on page load
+        callerSelect?.addEventListener('change', updateHandInputs);
         window.onload = () => {
-            if (localStorage.getItem("darkMode") === "true") {
-                document.body.classList.add("dark");
-            }
-
-            // 🎉 Trigger confetti + sound on winner display
-            const winnerMessage = document.querySelector(".game-over-message");
-            if (winnerMessage) {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            updateHandInputs();
+            if ({{ 'true' if game.game_over else 'false' }}) {
+                confetti();
                 document.getElementById("win").play();
+                saveWinnerToLocalStorage("{{ game.winner }}");
             }
-
-            // Call function to update hand value inputs based on selected caller
-            updateHandValueInputs();
+            loadHallOfFame();
+            updateStats();
         };
 
-        // 🔔 Play ding sound on call form submit
-        document.getElementById("call-it-form")?.addEventListener("submit", (event) => {
-            const handInputs = document.querySelectorAll('#hand-values-inputs input[type="number"]');
-            let allValid = true;
-            handInputs.forEach(input => {
-                if (input.value === '' || isNaN(input.value)) {
-                    allValid = false;
-                    input.style.borderColor = 'red'; // Highlight invalid input
-                } else {
-                    input.style.borderColor = ''; // Reset border
-                }
-            });
-
-            if (!allValid) {
-                alert('Please enter a number for all hand values.');
-                event.preventDefault(); // Stop form submission
-            } else {
-                document.getElementById("ding").play();
-            }
+        // Sound FX
+        document.getElementById("call-it-form")?.addEventListener("submit", () => {
+            document.getElementById("ding").play();
         });
 
-        // Client-side validation for add player form
-        document.getElementById("add-player-form").addEventListener("submit", (event) => {
-            const playerNameInput = document.getElementById("player-name-input");
-            if (playerNameInput.value.trim() === "") {
-                alert("Player name cannot be empty!");
-                event.preventDefault(); // Prevent form submission
-            }
-        });
-
-        // Dynamic hand value inputs based on caller selection
-        const callerSelect = document.getElementById('caller-select');
-        const handValuesInputsDiv = document.getElementById('hand-values-inputs');
-
-        function updateHandValueInputs() {
-            if (!callerSelect || !handValuesInputsDiv) return; // Exit if elements don't exist (e.g., no players yet)
-
-            const selectedCaller = callerSelect.value;
-            let html = '';
-            // This global 'game' object is available from Flask's render_template context
-            const players = JSON.parse('{{ game.players | tojson | safe }}'); // Safely pass Python dict to JS
-
-            for (const name in players) {
-                if (name !== selectedCaller) {
-                    html += `
-                        <label>
-                            ${name}'s hand value:
-                            <input type="number" name="hand_${name}" value="0">
-                        </label>
-                    `;
-                }
-            }
-            handValuesInputsDiv.innerHTML = html;
+        // Hall of Fame
+        function saveWinnerToLocalStorage(name) {
+            let fame = JSON.parse(localStorage.getItem("hallOfFame") || "[]");
+            fame.unshift(name);
+            localStorage.setItem("hallOfFame", JSON.stringify(fame.slice(0, 10)));
         }
 
-        callerSelect?.addEventListener('change', updateHandValueInputs);
+        function loadHallOfFame() {
+            const fame = JSON.parse(localStorage.getItem("hallOfFame") || "[]");
+            const ul = document.getElementById("hall-of-fame");
+            ul.innerHTML = fame.map(n => `<li>🏆 ${n}</li>`).join("");
+        }
 
+        // Copy Summary
+        function copySummary() {
+            let text = "Golf Game Summary:\n";
+            {% for name, score in game.players.items() %}
+            text += "{{ name }}: {{ score }} points\n";
+            {% endfor %}
+            navigator.clipboard.writeText(text);
+            alert("Summary copied to clipboard!");
+        }
+
+        // Stats
+        function updateStats() {
+            const statsBox = document.getElementById("stats");
+            if (!statsBox) return;
+            const rounds = {{ game.round }};
+            const players = {{ game.players | tojson }};
+            const history = {{ game.history | tojson }};
+            const callerStats = {};
+
+            history.forEach(entry => {
+                if (!callerStats[entry.caller]) callerStats[entry.caller] = { calls: 0, correct: 0 };
+                callerStats[entry.caller].calls++;
+                if (entry.correct) callerStats[entry.caller].correct++;
+            });
+
+            let stats = `<p>🔁 Total Rounds: ${rounds}</p>`;
+            for (let player in callerStats) {
+                const { calls, correct } = callerStats[player];
+                const percent = ((correct / calls) * 100).toFixed(0);
+                stats += `<p>${player} - 📞 Calls: ${calls}, ✅ Correct: ${percent}%</p>`;
+            }
+
+            statsBox.innerHTML = stats;
+        }
     </script>
 </body>
 </html>

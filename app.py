@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import os
-import json # Import json to safely pass the players dictionary
 
 app = Flask(__name__)
+app.secret_key = "golf-secret-key"
 
 class GolfGame:
     def __init__(self):
@@ -26,13 +26,13 @@ class GolfGame:
             'round': self.round,
             'caller': caller,
             'correct': correct,
-            'hand_values': hand_values.copy(), # Store hand values provided
-            'score_changes': {caller: change} # Initialize score changes for caller
+            'hand_values': hand_values.copy(),
+            'score_changes': {caller: change}
         }
 
-        for name, val in hand_values.items(): # These are already the non-caller players
+        for name, val in hand_values.items():
             self.players[name] += val
-            entry['score_changes'][name] = val # Add score changes for other players
+            entry['score_changes'][name] = val
 
         self.history.append(entry)
 
@@ -43,13 +43,11 @@ class GolfGame:
                 break
 
     def determine_winner(self):
-        # Winner is the player with the lowest score
         self.winner = min(self.players, key=self.players.get)
 
     def reset(self):
         self.__init__()
 
-# Global game instance
 game = GolfGame()
 
 @app.route("/", methods=["GET", "POST"])
@@ -65,17 +63,13 @@ def index():
             caller = request.form.get("caller")
             correct = request.form.get("correct") == "yes"
             hand_values = {}
-            # Iterate through all players to collect their hand values,
-            # but only if they are not the caller.
-            # The JS handles presenting only non-caller inputs,
-            # but this server-side logic ensures correctness.
             for name in game.players:
-                if name != caller: # IMPORTANT: Only process hand values for non-callers
-                    val = request.form.get(f"hand_{name}")
+                if name != caller:
                     try:
-                        hand_values[name] = int(val)
-                    except (ValueError, TypeError): # Handle cases where input might not be a valid number
-                        hand_values[name] = 0 # Default to 0 if invalid input
+                        val = int(request.form.get(f"hand_{name}", 0))
+                    except:
+                        val = 0
+                    hand_values[name] = val
             game.call_it(caller, correct, hand_values)
 
         elif action == "reset":
@@ -83,8 +77,24 @@ def index():
 
         return redirect(url_for('index'))
 
-    return render_template("index.html", game=game)
+    # Calculate basic stats
+    correct_calls = sum(1 for h in game.history if h["correct"])
+    total_calls = len(game.history)
+    correct_percent = round((correct_calls / total_calls) * 100) if total_calls > 0 else 0
+    avg_hand_value = 0
+    hand_total = sum(sum(entry["hand_values"].values()) for entry in game.history)
+    if total_calls > 0:
+        avg_hand_value = round(hand_total / total_calls)
+
+    return render_template(
+        "index.html",
+        game=game,
+        correct_percent=correct_percent,
+        avg_hand_value=avg_hand_value,
+        total_rounds=total_calls
+    )
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True) # Added debug=True for easier development
+    app.run(host="0.0.0.0", port=port)
+
